@@ -6,8 +6,9 @@ Created on 20/07/2013
 import time
 import praw
 import string
+from pprint import pprint
 from getpass import getpass
-USERNAME    = ""
+USERNAME    = "Drhealsgood"
 
 class RedditBot(object):
     """
@@ -79,3 +80,13 @@ class RedditBot(object):
         replies to comment with msg
         """
         comment.reply(msg)
+        
+    @classmethod
+    def _display_submission_info(cls,submission):
+        pprint(vars(submission))
+        
+if __name__ == "__main__":
+    x       = RedditBot({},["python"]) 
+    subs    = x._get_top_submissions(x.subreddits[0], 2)
+    for sub in subs:
+        RedditBot._display_submission_info(sub)
