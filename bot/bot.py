@@ -59,9 +59,23 @@ class RedditBot(object):
     def add_subreddit(self,subreddit):
         self.__subreds.append(subreddit)
         
-    def _get_submissions(self,subreddit,n):
+    def _get_top_submissions(self,subreddit,n):
         """
             returns top n submissions from
             subreddit
         """
         return self.__reddit.get_subreddit(subreddit).get_top(limit=n)
+    
+    def _get_new_submissions(self,subreddit,submission):
+        """
+            returns top submisons submitted later than
+            submission passed
+        """
+        return self.__reddit.get_subreddit(subreddit).get_top(limit=None,
+                                                              place_holder=submission.id)
+    
+    def _reply_to_comment(self,comment,msg):
+        """
+        replies to comment with msg
+        """
+        comment.reply(msg)
