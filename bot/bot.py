@@ -9,6 +9,7 @@ import string
 import pickle
 from pprint import pprint
 from getpass import getpass
+from abc import ABCMeta, abstractmethod, abstractproperty
 USERNAME    = "Drhealsgood"
 
 class RedditBot(object):
@@ -32,8 +33,9 @@ class RedditBot(object):
     __reddit        = praw.Reddit(__user_agent)
     __checked       = "../resources/checked.txt"
 
-    def __init__(self,rules,subreddits):
-        # log in
+    # might be better to read rules and subreddits in via pickle
+    def __init__(self,rules={},subreddits=[]):
+        # log in and set variables
         self.__reddit.login(USERNAME,getpass())
         self.__rules        = rules
         self.__subreds      = subreddits
@@ -68,17 +70,21 @@ class RedditBot(object):
     def add_subreddit(self,subreddit):
         self.__subreds.append(subreddit)
     
-    def _get_checked(self):    
+    @property
+    def submissions_checked(self):    
         """
         Returns checked submissions
         """
         return self.__done
     
-    def _save_checked(self):
+    def add_submission_checked(self,sub):    
+        self.__done.setdefault(sub.id,[]).append(sub)
+        
+    def _save_dict(self,dictionary,location):
         """
-        pickle dump the checked submissions
+        pickle dump the dictionary to location
         """
-        pickle.dump(self.__done, self.__checked)
+        pickle.dump(dictionary,location)
         
     def _get_top_submissions(self,subreddit,n):
         """
@@ -107,10 +113,69 @@ class RedditBot(object):
         
     def __repr__(self):
         return "RedditBot({0},{1})".format(self.__rules,self.__subreds)
+    
+    
+class Rule(meta=ABCMeta):
+    
+    @abstractmethod
+    def __init__(self,subreddits):
+        self._subreddits    = self._subreddits
+    
+    @abstractproperty
+    def subreddits_allowed(self):
+        return self._subreddits
+        
+    @abstractmethod
+    def condition(self,submission):
+        """
+        condition checks to see if submission
+        meets condition
+        """
+        pass
+    
+    @abstractmethod
+    def action(self):
+        """
+        action to take if rule condition is met
+        """
+        pass
+    
+    def __repr__(self):
+        return self.__class__
+    
+class LaughRule(Rule):
+    """
+    Comments with a laugh if parent comment contains a laugh
+    """
+    key_words   = ["laughing","lol","rofl","haha"]
+    
+    def __init__(self,subreddits,bot):
+        super().__init__(subreddits)
+        # I think it is terrible design.... probably
+        # need to rethink it
+        self._bot   = bot
+    
+    def condition(self,submission):
+        """
+        @todo:
+        consider return (submission.id not in self._bot.submissions and any(key in submission.selftext for key in self.key_words)
+        """
+        meets       = any(key in submission.selftext for key in self.key_words)
+        # have we done this submission?
+        if submission.id not in self._bot.submissions:
+            # mark submission as checked
+            self._bot.add_submission_checked(submission)
+            return meets
+        return False
+    
+
+    
         
 if __name__ == "__main__":
     x       = RedditBot({},["python"]) 
     subs    = x._get_top_submissions(x.subreddits[0], 2)
     print(x)
+    print(Rule())
     for sub in subs:
         RedditBot._display_submission_info(sub)
+        print("selftext:",sub.selftext)
