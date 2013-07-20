@@ -115,7 +115,7 @@ class RedditBot(object):
         return "RedditBot({0},{1})".format(self.__rules,self.__subreds)
     
     
-class Rule(meta=ABCMeta):
+class Rule(metaclass=ABCMeta):
     
     @abstractmethod
     def __init__(self,subreddits):
@@ -147,7 +147,9 @@ class LaughRule(Rule):
     """
     Comments with a laugh if parent comment contains a laugh
     """
-    key_words   = ["laughing","lol","rofl","haha"]
+    # fuck added because more people seem to swear than laugh and I want 
+    # to get some results for testing
+    key_words   = ["laughing","lol","rofl","haha","fuck"]
     
     def __init__(self,subreddits,bot):
         super().__init__(subreddits)
@@ -172,10 +174,8 @@ class LaughRule(Rule):
     
         
 if __name__ == "__main__":
-    x       = RedditBot({},["python"]) 
-    subs    = x._get_top_submissions(x.subreddits[0], 2)
-    print(x)
-    print(Rule())
+    x       = RedditBot({},["python","funny"]) 
+    subs    = x._get_top_submissions(x.subreddits[1], 20)
     for sub in subs:
-        RedditBot._display_submission_info(sub)
+        #RedditBot._display_submission_info(sub)
         print("selftext:",sub.selftext)
