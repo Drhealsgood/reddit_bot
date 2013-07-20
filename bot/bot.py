@@ -6,6 +6,7 @@ Created on 20/07/2013
 import time
 import praw
 import string
+import pickle
 from pprint import pprint
 from getpass import getpass
 USERNAME    = "Drhealsgood"
@@ -29,6 +30,7 @@ class RedditBot(object):
     __user_agent    = "reddit_bot_test v0.0 by /u/drhealsgood and /u/"
     # create Reddit object
     __reddit        = praw.Reddit(__user_agent)
+    __checked       = "../resources/checked.txt"
 
     def __init__(self,rules,subreddits):
         # log in
@@ -37,6 +39,12 @@ class RedditBot(object):
         self.__subreds      = subreddits
         # submission: comments
         self.__submissions  = {}
+        # submission.id : submission
+        try:
+            with open(self.__checked,'rb') as f:
+                self.__done = pickle.load(f) 
+        except:
+            self.__done     = {}
         
     @property
     def submissions(self):
@@ -59,6 +67,18 @@ class RedditBot(object):
     
     def add_subreddit(self,subreddit):
         self.__subreds.append(subreddit)
+    
+    def _get_checked(self):    
+        """
+        Returns checked submissions
+        """
+        return self.__done
+    
+    def _save_checked(self):
+        """
+        pickle dump the checked submissions
+        """
+        pickle.dump(self.__done, self.__checked)
         
     def _get_top_submissions(self,subreddit,n):
         """
@@ -85,8 +105,12 @@ class RedditBot(object):
     def _display_submission_info(cls,submission):
         pprint(vars(submission))
         
+    def __repr__(self):
+        return "RedditBot({0},{1})".format(self.__rules,self.__subreds)
+        
 if __name__ == "__main__":
     x       = RedditBot({},["python"]) 
     subs    = x._get_top_submissions(x.subreddits[0], 2)
+    print(x)
     for sub in subs:
         RedditBot._display_submission_info(sub)
