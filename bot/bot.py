@@ -34,7 +34,7 @@ class RedditBot(object):
     __checked       = "../resources/checked.txt"
 
     # might be better to read rules and subreddits in via pickle
-    def __init__(self,rules={},subreddits=[]):
+    def __init__(self,rules=(),subreddits=[]):
         # log in and set variables
         self.__reddit.login(USERNAME,getpass())
         self.__rules        = rules
@@ -57,7 +57,7 @@ class RedditBot(object):
         return self.__rules
     
     def add_rule(self, rule):
-        self.__rules.append(rule)
+        pass 
     
     @property
     def subreddits(self):
@@ -119,9 +119,11 @@ class Rule(metaclass=ABCMeta):
     
     @abstractmethod
     def __init__(self,subreddits):
-        self._subreddits    = self._subreddits
+        """
+        @param subreddits: The subreddits that this rule will apply to
+        """
+        self._subreddits    = subreddits
     
-    @abstractproperty
     def subreddits_allowed(self):
         return self._subreddits
         
@@ -147,9 +149,8 @@ class LaughRule(Rule):
     """
     Comments with a laugh if parent comment contains a laugh
     """
-    # fuck added because more people seem to swear than laugh and I want 
-    # to get some results for testing
-    key_words   = ["laughing","lol","rofl","haha","fuck"]
+    
+    key_words   = ["laugh","lol","rofl","haha"]
     
     def __init__(self,subreddits,bot):
         super().__init__(subreddits)
@@ -170,12 +171,13 @@ class LaughRule(Rule):
             return meets
         return False
     
-
+    def action(self):
+        print("Hit laugh rule action")
+    
     
         
 if __name__ == "__main__":
-    x       = RedditBot({},["python","funny"]) 
-    subs    = x._get_top_submissions(x.subreddits[1], 20)
-    for sub in subs:
-        #RedditBot._display_submission_info(sub)
-        print("selftext:",sub.selftext)
+    x       = RedditBot((),["python","funny"]) 
+    x.add_rule(LaughRule(("funny"),x))
+    subs    = x._get_top_submissions(x.subreddits[1], 200)
+    subs    = [sub for sub in subs if sub.selftext!="" and sub not in x.submissions_checked]
