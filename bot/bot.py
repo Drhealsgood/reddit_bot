@@ -2,6 +2,13 @@
 Created on 20/07/2013
 
 @author: luke
+
+@todo: when a new rule is introduced we need to check submissions for that
+rule too, even if they are in checked_submissions
+@todo: when gathering submissions should only gather those that have not been
+checked yet. should always run through n submissions though
+something like, take len of checked, add that to n, take n+len(checked) subs
+and that should give all the unchecked as well
 '''
 import time
 import praw
@@ -10,7 +17,7 @@ import pickle
 from pprint import pprint
 from getpass import getpass
 from abc import ABCMeta, abstractmethod, abstractproperty
-USERNAME    = "Drhealsgood"
+USERNAME,PASSWORD    = "a_shitty_bot","hahaha"
 
 class RedditBot(object):
     """
@@ -32,16 +39,18 @@ class RedditBot(object):
     # create Reddit object
     __reddit        = praw.Reddit(__user_agent)
     __checked       = "../resources/checked.txt"
+    __rules_run     = [] # when a rule has been run succesfully it will be
+                        # added to rules_run
 
     # might be better to read rules and subreddits in via pickle
     def __init__(self,rules=(),subreddits=[]):
         # log in and set variables
-        self.__reddit.login(USERNAME,getpass())
+        #self.__reddit.login(USERNAME,getpass())
+        # MAKE SURE TO REMOVE THIS LINE
+        self.__reddit.login(USERNAME,PASSWORD)
         self.__rules        = rules
-        self.__subreds      = subreddits
-        # submission: comments
-        self.__submissions  = {}
-        # submission.id : submission
+        self.__subreddits   = subreddits
+        # submission.id : submission submissions checked
         try:
             with open(self.__checked,'rb') as f:
                 self.__done = pickle.load(f) 
@@ -61,14 +70,18 @@ class RedditBot(object):
     
     @property
     def subreddits(self):
-        return self.__subreds
+        return self.__subreddits
     
     @subreddits.setter
     def subreddits(self,new_subreddits):
         self.__subreddits   = new_subreddits
     
-    def add_subreddit(self,subreddit):
-        self.__subreds.append(subreddit)
+    def add_subreddit(self,*args):
+        """
+        Adds all subreddits in args to __subreddits
+        """
+        for subreddit in args:
+            self.__subreddits.append(subreddit)
     
     @property
     def submissions_checked(self):    
@@ -78,6 +91,9 @@ class RedditBot(object):
         return self.__done
     
     def add_submission_checked(self,sub):    
+        """
+        adds sub  to submissions checked
+        """
         self.__done.setdefault(sub.id,[]).append(sub)
         
     def _save_dict(self,dictionary,location):
@@ -112,7 +128,7 @@ class RedditBot(object):
         pprint(vars(submission))
         
     def __repr__(self):
-        return "RedditBot({0},{1})".format(self.__rules,self.__subreds)
+        return "RedditBot({0},{1})".format(self.__rules,self.__subreddits)
     
     
 class Rule(metaclass=ABCMeta):
@@ -122,10 +138,10 @@ class Rule(metaclass=ABCMeta):
         """
         @param subreddits: The subreddits that this rule will apply to
         """
-        self._subreddits    = subreddits
+        self.__active_subreddits    = subreddits
     
     def subreddits_allowed(self):
-        return self._subreddits
+        return self.__active_subreddits
         
     @abstractmethod
     def condition(self,submission):
@@ -133,14 +149,14 @@ class Rule(metaclass=ABCMeta):
         condition checks to see if submission
         meets condition
         """
-        pass
+        return True
     
     @abstractmethod
-    def action(self):
+    def action(self,submission):
         """
         action to take if rule condition is met
         """
-        pass
+        return submission
     
     def __repr__(self):
         return self.__class__
@@ -171,8 +187,8 @@ class LaughRule(Rule):
             return meets
         return False
     
-    def action(self):
-        print("Hit laugh rule action")
+    def action(self,submission):
+        print(submission.id,"Hit laugh rule action")
     
     
         
