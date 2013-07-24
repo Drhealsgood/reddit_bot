@@ -17,7 +17,8 @@ import pickle
 from pprint import pprint
 from getpass import getpass
 from abc import ABCMeta, abstractmethod, abstractproperty
-USERNAME,PASSWORD    = "a_shitty_bot","hahaha"
+USERNAME,PASSWORD   = "a_shitty_bot","hahaha"
+ID                  = 0
 
 class RedditBot(object):
     """
@@ -38,18 +39,25 @@ class RedditBot(object):
     __user_agent    = "reddit_bot_test v0.0 by /u/drhealsgood and /u/"
     # create Reddit object
     __reddit        = praw.Reddit(__user_agent)
-    __checked       = "../resources/checked.txt"
-    __rules_run     = [] # when a rule has been run succesfully it will be
-                        # added to rules_run
+    __checked       = "../resources/"+str(ID)+"_checked.txt"
+    
 
     # might be better to read rules and subreddits in via pickle
-    def __init__(self,rules=(),subreddits=[]):
+    def __init__(self,subreddits=(),id=None):
+        global ID
         # log in and set variables
         #self.__reddit.login(USERNAME,getpass())
-        # MAKE SURE TO REMOVE THIS LINE
+        if not id:
+            self.__id       = ID
+            print(self.__id, ID)
+            ID              = self.__id + 1
+        else:
+            self.__id       = id
         self.__reddit.login(USERNAME,PASSWORD)
-        self.__rules        = rules
-        self.__subreddits   = subreddits
+        self.__rules        = ()
+        self.__subreddits   = subreddits # subreddits to run in
+        self.__rules_run    = [] # when a rule has been run succesfully it will be
+                        # added to rules_run
         # submission.id : submission submissions checked
         try:
             with open(self.__checked,'rb') as f:
@@ -57,10 +65,6 @@ class RedditBot(object):
         except:
             self.__done     = {}
         
-    @property
-    def submissions(self):
-        return self.__submissions
-    
     @property
     def rules(self):
         return self.__rules
@@ -168,7 +172,7 @@ class LaughRule(Rule):
     
     key_words   = ["laugh","lol","rofl","haha"]
     
-    def __init__(self,subreddits,bot):
+    def __init__(self,bot,subreddits=["funny"]):
         super().__init__(subreddits)
         # I think it is terrible design.... probably
         # need to rethink it
@@ -192,8 +196,8 @@ class LaughRule(Rule):
     
     
         
-if __name__ == "__main__":
-    x       = RedditBot((),["python","funny"]) 
-    x.add_rule(LaughRule(("funny"),x))
-    subs    = x._get_top_submissions(x.subreddits[1], 200)
-    subs    = [sub for sub in subs if sub.selftext!="" and sub not in x.submissions_checked]
+#if __name__ == "__main__":
+#    x       = RedditBot((),["python","funny"]) 
+#    x.add_rule(LaughRule(("funny"),x))
+#    subs    = x._get_top_submissions(x.subreddits[1], 200)
+#    subs    = [sub for sub in subs if sub.selftext!="" and sub not in x.submissions_checked]
