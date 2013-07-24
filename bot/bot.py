@@ -68,8 +68,9 @@ class RedditBot(object):
     def rules(self):
         return self.__rules
     
-    def add_rule(self, rule):
-        pass 
+    def add_rule(self, *args):
+        for arg in args:
+            self.__rules += (arg,) 
     
     @property
     def subreddits(self):
@@ -110,6 +111,8 @@ class RedditBot(object):
             returns top n submissions from
             subreddit
         """
+        subs    = self.__reddit.get_subreddit(subreddit).get_top(limit=n)
+        print(subs)
         return self.__reddit.get_subreddit(subreddit).get_top(limit=n)
     
     def _get_new_top_submissions(self,subreddit,submission,n):
@@ -135,6 +138,11 @@ class RedditBot(object):
     
     
 class Rule(metaclass=ABCMeta):
+    __name      = "BaseRule"
+    
+    @abstractproperty
+    def name(self):
+        return self.__name
     
     @abstractmethod
     def __init__(self,subreddits):
@@ -162,12 +170,19 @@ class Rule(metaclass=ABCMeta):
         return submission
     
     def __repr__(self):
-        return self.__class__
+        return "{0}".format(self.__class__)
+    
+    def __eq__(self,other):
+        return self.name == other.name
     
 class LaughRule(Rule):
     """
     Comments with a laugh if parent comment contains a laugh
     """
+    __name      = "LaughRule"
+    
+    def name(self):
+        return self.__name
     
     key_words   = ["laugh","lol","rofl","haha"]
     
