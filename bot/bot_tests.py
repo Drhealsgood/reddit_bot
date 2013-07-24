@@ -78,6 +78,72 @@ class TestRedditBot(unittest.TestCase):
         for sub in subs:
             self.assertIn(sub, self._bot.subreddits)
         self.assertEqual(len(self._bot.subreddits),len(subs))
+        
+    def testAddSubreddit(self):
+        """
+        When adding a subreddit for the bot to watch it should be added
+        to the subreddits attribute of the bot
+        """
+        subredlen       = lambda: len(self._bot.subreddits)
+        curr            = subredlen()
+        self._bot.add_subreddit('datgap')
+        self.assertIn('datgap',self._bot.subreddits)
+        self.assertEqual(subredlen(),curr+1)
+        
+    def testSubmissionsChecked(self):
+        """
+            Upon initialisation of a bot no submission should be checked
+            @todo: tests with submissions checked
+        """
+        self.assertEqual(self._bot.submissions_checked,{})
+        
+    def testAddSubmissionChecked(self):
+        """
+        when a submission is checked it should be added to
+        the checked submissions dict
+        """
+        # get submission
+        # add submission to checked
+        # ensure submission is in checked
+        pass
+    
+    def testGetTopSubmissions(self):
+        """
+            returns top n submissions from whichever subreddit passed
+            @todo: if a subreddit has less than n submissions, what do?
+        """
+        n           = 1
+        topSubs     = self._bot._get_top_submissions('bottesting', 50)
+        for sub in topSubs:
+            print(sub)
+        self.assertEqual(len(list(topSubs)),2)
+        
+    def testSaveDict(self):
+        """
+        Saves the dictionary passed to the location passed via pickle
+        """
+        pass
+    
+    def testGetNewSubmissions(self):
+        """
+        returns n new submissions from the subreddit passed
+        """
+        n           = 1
+        newSubs     = self._bot._get_new_top_submissions('bottesting', submission, n)
+    
+    def testReplyToComment(self):
+        """
+        Replies to a comment with msg passed
+        if passed comment is not a comment will (raise typeerror)?
+        """
+        pass
+    
+    def testReplyToPos(self):
+        """
+        Replies to a post with msg passed
+        if passed post is not a post will (raise typeerror)?
+        """
+        pass
                             
     
     

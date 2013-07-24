@@ -49,7 +49,6 @@ class RedditBot(object):
         #self.__reddit.login(USERNAME,getpass())
         if not id:
             self.__id       = ID
-            print(self.__id, ID)
             ID              = self.__id + 1
         else:
             self.__id       = id
@@ -84,8 +83,8 @@ class RedditBot(object):
         """
         Adds all subreddits in args to __subreddits
         """
-        for subreddit in args:
-            self.__subreddits.append(subreddit)
+        for subred in args:
+            self.__subreddits += (subred,)
     
     @property
     def submissions_checked(self):    
@@ -94,7 +93,7 @@ class RedditBot(object):
         """
         return self.__done
     
-    def add_submission_checked(self,sub):    
+    def _add_submission_checked(self,sub):    
         """
         adds sub  to submissions checked
         """
@@ -113,9 +112,9 @@ class RedditBot(object):
         """
         return self.__reddit.get_subreddit(subreddit).get_top(limit=n)
     
-    def _get_new_submissions(self,subreddit,submission):
+    def _get_new_top_submissions(self,subreddit,submission,n):
         """
-            returns top submisons submitted later than
+            returns n top submisons submitted later than
             submission passed
         """
         return self.__reddit.get_subreddit(subreddit).get_top(limit=None,
@@ -132,7 +131,7 @@ class RedditBot(object):
         pprint(vars(submission))
         
     def __repr__(self):
-        return "RedditBot({0},{1})".format(self.__rules,self.__subreddits)
+        return "RedditBot({1}); Rules:{0}".format(self.__rules,self.__subreddits)
     
     
 class Rule(metaclass=ABCMeta):
