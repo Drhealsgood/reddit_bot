@@ -35,7 +35,7 @@ class TestRedditBot(unittest.TestCase):
                        }
         for val in expected:
             if val == '__id':
-                self.assertEqual(attrs['_RedditBot'+val],expected[val]+1,
+                self.assertEqual(attrs['_RedditBot'+val],expected[val],
                             "got {0} for {1}, expected {2}".format(attrs['_RedditBot'+val],
                                                                     val, expected[val]))
             else:
