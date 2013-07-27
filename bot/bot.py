@@ -119,21 +119,21 @@ class RedditBot(object):
         """
         pickle.dump(dictionary,location)
         
-    def _get_top_submissions(self,subreddit,n):
+    def _get_hot_submissions(self,subreddit,n):
         """
             returns top n submissions from
             subreddit
         """
-        subs    = self.__reddit.get_subreddit(subreddit).get_top(limit=n)
-        print(subs)
-        return self.__reddit.get_subreddit(subreddit).get_top(limit=n)
+        subs    = self.__reddit.get_subreddit(subreddit).get_hot(limit=n)
+        print(next(subs))
+        return self.__reddit.get_subreddit(subreddit).get_hot(limit=n)
     
     def _get_new_top_submissions(self,subreddit,submission,n):
         """
             returns n top submisons submitted later than
             submission passed
         """
-        return self.__reddit.get_subreddit(subreddit).get_top(limit=None,
+        return self.__reddit.get_subreddit(subreddit).get_hot(limit=None,
                                                               place_holder=submission.id)
     
     def _reply_to_comment(self,comment,msg):
@@ -186,7 +186,6 @@ class Rule(metaclass=ABCMeta):
         return "{0}".format(self.__class__)
     
     def __eq__(self,other):
-        print(self.name,other.name)
         return self.name == other.name
     
 class LaughRule(Rule):
@@ -228,5 +227,5 @@ class LaughRule(Rule):
 #if __name__ == "__main__":
 #    x       = RedditBot((),["python","funny"]) 
 #    x.add_rule(LaughRule(("funny"),x))
-#    subs    = x._get_top_submissions(x.subreddits[1], 200)
+#    subs    = x._get_hot_submissions(x.subreddits[1], 200)
 #    subs    = [sub for sub in subs if sub.selftext!="" and sub not in x.submissions_checked]

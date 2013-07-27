@@ -115,7 +115,7 @@ class TestRedditBot(unittest.TestCase):
             @todo: if a subreddit has less than n submissions, what do?
         """
         n           = 1
-        topSubs     = self._bot._get_top_submissions('drsbottesting', 50)
+        topSubs     = self._bot._get_hot_submissions('drsbottesting', 50)
         for sub in topSubs:
             print(sub)
         self.assertEqual(len(list(topSubs)),3)
