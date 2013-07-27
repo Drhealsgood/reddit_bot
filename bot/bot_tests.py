@@ -65,7 +65,6 @@ class TestRedditBot(unittest.TestCase):
             rules so the bot knows to check for it
         """
         self._bot.add_rule(LaughRule(self._bot))
-        print(self._bot.rules)
         self.assertIn(LaughRule(self._bot),self._bot.rules)
         self.assertEqual(len(self._bot.rules),1)
         
@@ -109,15 +108,13 @@ class TestRedditBot(unittest.TestCase):
         # ensure submission is in checked
         pass
     
-    def testGetTopSubmissions(self):
+    def testGetHotSubmissions(self):
         """
             returns top n submissions from whichever subreddit passed
             @todo: if a subreddit has less than n submissions, what do?
         """
         n           = 1
-        topSubs     = self._bot._get_hot_submissions('drsbottesting', 50)
-        for sub in topSubs:
-            print(sub)
+        topSubs     = self._bot._get_hot_submissions('drsbottesting', 3)
         self.assertEqual(len(list(topSubs)),3)
         
     def testSaveDict(self):

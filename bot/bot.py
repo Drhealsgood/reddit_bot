@@ -121,11 +121,9 @@ class RedditBot(object):
         
     def _get_hot_submissions(self,subreddit,n):
         """
-            returns top n submissions from
+            returns top hot n submissions from
             subreddit
         """
-        subs    = self.__reddit.get_subreddit(subreddit).get_hot(limit=n)
-        print(next(subs))
         return self.__reddit.get_subreddit(subreddit).get_hot(limit=n)
     
     def _get_new_top_submissions(self,subreddit,submission,n):
