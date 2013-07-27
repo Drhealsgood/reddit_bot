@@ -8,14 +8,15 @@ from bot import *
 
 
 class TestRedditBot(unittest.TestCase):
-
+    _bot   = RedditBot()
 
     def setUp(self):
-        self._bot   = RedditBot()
+        pass
 
 
     def tearDown(self):
-        self._bot   = None
+        # clear the clutter
+        self._bot._clear_data()
 
 
     def testInit(self):
@@ -114,10 +115,10 @@ class TestRedditBot(unittest.TestCase):
             @todo: if a subreddit has less than n submissions, what do?
         """
         n           = 1
-        topSubs     = self._bot._get_top_submissions('bottesting', 50)
+        topSubs     = self._bot._get_top_submissions('drsbottesting', 50)
         for sub in topSubs:
             print(sub)
-        self.assertEqual(len(list(topSubs)),2)
+        self.assertEqual(len(list(topSubs)),3)
         
     def testSaveDict(self):
         """
@@ -130,7 +131,7 @@ class TestRedditBot(unittest.TestCase):
         returns n new submissions from the subreddit passed
         """
         n           = 1
-        newSubs     = self._bot._get_new_top_submissions('bottesting', submission, n)
+        newSubs     = self._bot._get_new_top_submissions('drsbottesting', submission, n)
     
     def testReplyToComment(self):
         """
@@ -145,7 +146,24 @@ class TestRedditBot(unittest.TestCase):
         if passed post is not a post will (raise typeerror)?
         """
         pass
-                            
+    
+    def testClearData(self):
+        """
+        The purpose of clear data is to clear all the
+        data stored in our bot - a soft reset so to speak.
+        """
+        # all rules, subreddits, rules_run, and submissions checked
+        # should be set to blank slate
+        expected= {'rules':(),'subreddits':(),
+                   'rules_run':[],'done':{},}    
+        actual  = {'rules':self._bot.rules,
+                   'subreddits':self._bot.subreddits,
+                   'rules_run':self._bot.rules_run,
+                   'done':self._bot.submissions_checked,
+                   }    
+        for val in expected:
+            self.assertEqual(expected[val],actual[val],
+                "Expected {0} but got {1}".format(expected[val],actual[val]))
     
     
 if __name__ == "__main__":

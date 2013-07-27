@@ -56,13 +56,20 @@ class RedditBot(object):
         self.__rules        = ()
         self.__subreddits   = subreddits # subreddits to run in
         self.__rules_run    = [] # when a rule has been run succesfully it will be
-                        # added to rules_run
+                        # added to rules_run, maybe not needed
         # submission.id : submission submissions checked
         try:
             with open(self.__checked,'rb') as f:
                 self.__done = pickle.load(f) 
         except:
             self.__done     = {}
+            
+    def _clear_data(self):
+        # reset rules, subreddits, rules_run to nothing
+        self.__rules        = ()
+        self.__subreddits   = ()
+        self.__rules_run    = []
+        self.__done         = {}
         
     @property
     def rules(self):
@@ -74,15 +81,21 @@ class RedditBot(object):
     
     @property
     def subreddits(self):
+        """
+        Returns subreddits the bot will watch
+        """
         return self.__subreddits
     
     @subreddits.setter
     def subreddits(self,new_subreddits):
+        """
+        Set a new set of subreddits to watch
+        """
         self.__subreddits   = new_subreddits
     
     def add_subreddit(self,*args):
         """
-        Adds all subreddits in args to __subreddits
+        Add a subreddit to watch
         """
         for subred in args:
             self.__subreddits += (subred,)
@@ -173,6 +186,7 @@ class Rule(metaclass=ABCMeta):
         return "{0}".format(self.__class__)
     
     def __eq__(self,other):
+        print(self.name,other.name)
         return self.name == other.name
     
 class LaughRule(Rule):
@@ -181,6 +195,7 @@ class LaughRule(Rule):
     """
     __name      = "LaughRule"
     
+    @property
     def name(self):
         return self.__name
     
