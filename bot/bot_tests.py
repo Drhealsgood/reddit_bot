@@ -136,7 +136,9 @@ class TestRedditBot(unittest.TestCase):
         returns n new submissions from the subreddit passed
         """
         n           = 1
+        submission  = next(REDDIT.get_subreddit("drsbottesting").get_hot())
         newSubs     = self._bot._get_new_top_submissions('drsbottesting', submission, n)
+        
     
     def testReplyToComment(self):
         """
@@ -171,7 +173,7 @@ class TestRedditBot(unittest.TestCase):
                 "Expected {0} but got {1}".format(expected[val],actual[val]))
             
 
-class TestBaseRule(unittest.TestCase,metaclass=ABCMETA):
+class TestBaseRule(unittest.TestCase,metaclass=ABCMeta):
     """
     A Rule should have a name;
     active subreddits; a condition;
@@ -241,9 +243,31 @@ class TestLaughRule(TestBaseRule):
 
         def testAction(self):
             return TestBaseRule.testAction(self)
+        
+        def fail(self):
+            self.assertTrue(False)
 
+bot,laugh  = TestRedditBot(),TestLaughRule()
+test_cases = (bot.testInit,bot.testInitWithParams,
+              bot.testRules,bot.testAddRule,
+              bot.testSubreddits,bot.testAddSubreddit,
+              bot.testGetHotSubmissions,bot.testSaveDict,
+              bot.testGetNewSubmissions,bot.testReplyToComment,
+              bot.testReplyToPos,bot.testClearData,
+              laugh.testEq,laugh.testCondition,
+              laugh.testAction, laugh.fail,
+              )
+        
+
+def load_tests(loader, tests):
+    suite = unittest.TestSuite()
+    for case in test_cases:
+        suite.addTest(case)
+    x           = unittest.TextTestRunner()
+    x.verbosity = 1
+    x.run(suite)
     
     
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()
+    load_tests(unittest.loader,test_cases)
