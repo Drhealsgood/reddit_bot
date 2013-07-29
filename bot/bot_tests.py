@@ -5,6 +5,14 @@ Created on 23/07/2013
 '''
 import unittest
 from bot import *
+def gather_data():
+    global REDDIT
+    ua      = "test_bot"
+    REDDIT  = praw.Reddit(ua)
+    REDDIT.login(USERNAME,PASSWORD)
+    
+# Reddit will be the praw Reddit agent
+gather_data()
 
 
 class TestRedditBot(unittest.TestCase):
@@ -170,9 +178,10 @@ class TestRule(unittest.TestCase):
     and an action.
     A rule should have equailty.
     """
+    _submission    = REDDIT.get_new()
     
     def setUp(self):
-        self._rule  = Rule(subreddits="drsbottesting")
+        self._rule  = BaseRule(subreddits="drsbottesting")
     
     def tearDown(self):
         self._rule  = None
@@ -184,13 +193,26 @@ class TestRule(unittest.TestCase):
         The equality should also be based upon the subreddits
         a rule has
         """
-        other   = Rule(subreddits="drsbottesting")
+        other   = BaseRule(subreddits="drsbottesting")
         self.assertEqual(self._rule,other)
         self.assertNotEqual(self._rule,)
-        self.assertNotEqual(self._rule,Rule(subreddits="funny"))
+        self.assertNotEqual(self._rule,BaseRule(subreddits="funny"))
         self.assertEqual(self._rule.name,other.name)
         self.assertEqual(self._rule.subreddits_allowed,other.subreddits_allowed)
         
+    def testCondition(self):
+        """
+        A condition should eventually return True or False
+        the base Rule will simply return True
+        """
+        self.assertTrue(self._rule.condition(self._submission))
+        
+    def testAction(self):
+        """
+        The BaseRule will simply return the submission
+        as it has passed the condition
+        """
+        self.assertEqual(self._rule.action(self._submission),self._submission)
     
     
     

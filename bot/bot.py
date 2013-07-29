@@ -149,24 +149,18 @@ class RedditBot(object):
     
     
 class Rule(metaclass=ABCMeta):
-    __name      = "BaseRule"
+    __name      = "Rule"
     
     @abstractproperty
     def name(self):
         return self.__name
     
     @abstractmethod
-    def __init__(self,subreddits):
-        """
-        @param subreddits: The subreddits that this rule will apply to
-        """
-        self.__active_subreddits    = subreddits
-    
-    def subreddits_allowed(self):
-        return self.__active_subreddits
+    def __init__(self):
+        pass
         
     @abstractmethod
-    def condition(self,submission):
+    def condition(self):
         """
         condition checks to see if submission
         meets condition
@@ -174,20 +168,44 @@ class Rule(metaclass=ABCMeta):
         return True
     
     @abstractmethod
-    def action(self,submission):
+    def action(self):
         """
         action to take if rule condition is met
         """
-        return submission
+        return True
     
     def __repr__(self):
         return "{0}".format(self.__class__)
     
+class BaseRule(Rule):
+    _name   = "BaseRule"
+    
+    def __init__(self,subreddits):
+        """
+        @param subreddits: The subreddits that this rule will apply to
+        """
+        self.__active_subreddits    = subreddits
+
+    def name(self):
+        return self.__name
+
+
+    def condition(self, submission):
+        return Rule.condition(self, submission)
+
+
+    def action(self, submission):
+        return Rule.action(self, submission)
+
+    
+    def subreddits_allowed(self):
+        return self.__active_subreddits
+    
     def __eq__(self,other):
         return (self.name==other.name) and (
                     self.subreddits_allowed==other.subreddits_allowed)
-    
-class LaughRule(Rule):
+        
+class LaughRule(BaseRule):
     """
     Comments with a laugh if parent comment contains a laugh
     """
