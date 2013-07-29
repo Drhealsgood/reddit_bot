@@ -178,7 +178,7 @@ class Rule(metaclass=ABCMeta):
         return "{0}".format(self.__class__)
     
 class BaseRule(Rule):
-    _name   = "BaseRule"
+    __name   = "BaseRule"
     
     def __init__(self,subreddits):
         """

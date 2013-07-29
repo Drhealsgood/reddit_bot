@@ -171,7 +171,7 @@ class TestRedditBot(unittest.TestCase):
                 "Expected {0} but got {1}".format(expected[val],actual[val]))
             
 
-class TestRule(unittest.TestCase):
+class TestBaseRule(unittest.TestCase):
     """
     A Rule should have a name;
     active subreddits; a condition;
