@@ -161,6 +161,37 @@ class TestRedditBot(unittest.TestCase):
         for val in expected:
             self.assertEqual(expected[val],actual[val],
                 "Expected {0} but got {1}".format(expected[val],actual[val]))
+            
+
+class TestRule(unittest.TestCase):
+    """
+    A Rule should have a name;
+    active subreddits; a condition;
+    and an action.
+    A rule should have equailty.
+    """
+    
+    def setUp(self):
+        self._rule  = Rule(subreddits="drsbottesting")
+    
+    def tearDown(self):
+        self._rule  = None
+    
+    def testEq(self):
+        """
+        Each rule type should have a unique name as an
+        identifier to the rule type
+        The equality should also be based upon the subreddits
+        a rule has
+        """
+        other   = Rule(subreddits="drsbottesting")
+        self.assertEqual(self._rule,other)
+        self.assertNotEqual(self._rule,)
+        self.assertNotEqual(self._rule,Rule(subreddits="funny"))
+        self.assertEqual(self._rule.name,other.name)
+        self.assertEqual(self._rule.subreddits_allowed,other.subreddits_allowed)
+        
+    
     
     
 if __name__ == "__main__":

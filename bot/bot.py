@@ -184,7 +184,8 @@ class Rule(metaclass=ABCMeta):
         return "{0}".format(self.__class__)
     
     def __eq__(self,other):
-        return self.name == other.name
+        return (self.name==other.name) and (
+                    self.subreddits_allowed==other.subreddits_allowed)
     
 class LaughRule(Rule):
     """
