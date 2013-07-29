@@ -171,7 +171,7 @@ class TestRedditBot(unittest.TestCase):
                 "Expected {0} but got {1}".format(expected[val],actual[val]))
             
 
-class TestBaseRule(unittest.TestCase):
+class TestBaseRule(unittest.TestCase,metaclass=ABCMETA):
     """
     A Rule should have a name;
     active subreddits; a condition;
@@ -180,12 +180,15 @@ class TestBaseRule(unittest.TestCase):
     """
     _submission    = REDDIT.get_new()
     
+    @abstractmethod
     def setUp(self):
         self._rule  = BaseRule(subreddits="drsbottesting")
-    
+        
+    @abstractmethod
     def tearDown(self):
         self._rule  = None
-    
+        
+    @abstractmethod
     def testEq(self):
         """
         Each rule type should have a unique name as an
@@ -195,18 +198,19 @@ class TestBaseRule(unittest.TestCase):
         """
         other   = BaseRule(subreddits="drsbottesting")
         self.assertEqual(self._rule,other)
-        self.assertNotEqual(self._rule,)
         self.assertNotEqual(self._rule,BaseRule(subreddits="funny"))
         self.assertEqual(self._rule.name,other.name)
         self.assertEqual(self._rule.subreddits_allowed,other.subreddits_allowed)
         
+    @abstractmethod
     def testCondition(self):
         """
         A condition should eventually return True or False
         the base Rule will simply return True
         """
         self.assertTrue(self._rule.condition(self._submission))
-        
+    
+    @abstractmethod
     def testAction(self):
         """
         The BaseRule will simply return the submission
@@ -214,6 +218,30 @@ class TestBaseRule(unittest.TestCase):
         """
         self.assertEqual(self._rule.action(self._submission),self._submission)
     
+class TestLaughRule(TestBaseRule):
+    
+        def __init__(self):
+            pass
+
+        def setUp(self):
+            return TestBaseRule.setUp(self)
+
+
+        def tearDown(self):
+            return TestBaseRule.tearDown(self)
+
+
+        def testEq(self):
+            return TestBaseRule.testEq(self)
+
+
+        def testCondition(self):
+            return TestBaseRule.testCondition(self)
+
+
+        def testAction(self):
+            return TestBaseRule.testAction(self)
+
     
     
 if __name__ == "__main__":

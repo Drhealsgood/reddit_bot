@@ -186,22 +186,25 @@ class BaseRule(Rule):
         """
         self.__active_subreddits    = subreddits
 
+    @property
     def name(self):
         return self.__name
 
-
     def condition(self, submission):
-        return Rule.condition(self, submission)
-
+        """
+        Condition based upon a submission. Always TruE?
+        """
+        return True
 
     def action(self, submission):
-        return Rule.action(self, submission)
+        return submission
 
-    
+    @property
     def subreddits_allowed(self):
         return self.__active_subreddits
     
     def __eq__(self,other):
+        print(self.name,other.name)
         return (self.name==other.name) and (
                     self.subreddits_allowed==other.subreddits_allowed)
         
