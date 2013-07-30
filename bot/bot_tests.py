@@ -242,18 +242,7 @@ class TestLaughRule(TestBaseRule):
         def fail(self):
             self.assertTrue(False)
 
-bot  = TestRedditBot()
-bot_test_cases = (
-                  bot.testInit,bot.testInitWithParams,
-                  bot.testRules,bot.testAddRule,
-                  bot.testSubreddits,bot.testAddSubreddit,
-                  bot.testGetHotSubmissions,bot.testSaveDict,
-                  bot.testGetNewSubmissions,bot.testReplyToComment,
-                  bot.testReplyToPos,bot.testClearData,
-                  )
-        
-
-def load_tests(loader, tests):
+def load_tests(loader):
     suite = unittest.loader.makeSuite(TestLaughRule)
     v       = unittest.TextTestRunner()
     v.verbosity = 1
@@ -264,4 +253,4 @@ def load_tests(loader, tests):
     
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
-    load_tests(unittest.loader,bot_test_cases)
+    load_tests(unittest.loader)
