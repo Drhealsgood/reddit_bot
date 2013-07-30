@@ -26,7 +26,7 @@ class TestRedditBot(unittest.TestCase):
         # clear the clutter
         self._bot._clear_data()
 
-
+        
     def testInit(self):
         """
         A bot should have:
@@ -222,20 +222,15 @@ class TestBaseRule(unittest.TestCase,metaclass=ABCMeta):
     
 class TestLaughRule(TestBaseRule):
     
-        def __init__(self):
-            pass
-
         def setUp(self):
-            return TestBaseRule.setUp(self)
+            pass
 
 
         def tearDown(self):
-            return TestBaseRule.tearDown(self)
-
+            pass
 
         def testEq(self):
-            return TestBaseRule.testEq(self)
-
+            self.assertFalse(True)
 
         def testCondition(self):
             return TestBaseRule.testCondition(self)
@@ -247,27 +242,26 @@ class TestLaughRule(TestBaseRule):
         def fail(self):
             self.assertTrue(False)
 
-bot,laugh  = TestRedditBot(),TestLaughRule()
-test_cases = (bot.testInit,bot.testInitWithParams,
-              bot.testRules,bot.testAddRule,
-              bot.testSubreddits,bot.testAddSubreddit,
-              bot.testGetHotSubmissions,bot.testSaveDict,
-              bot.testGetNewSubmissions,bot.testReplyToComment,
-              bot.testReplyToPos,bot.testClearData,
-              laugh.testEq,laugh.testCondition,
-              laugh.testAction, laugh.fail,
-              )
+bot  = TestRedditBot()
+bot_test_cases = (
+                  bot.testInit,bot.testInitWithParams,
+                  bot.testRules,bot.testAddRule,
+                  bot.testSubreddits,bot.testAddSubreddit,
+                  bot.testGetHotSubmissions,bot.testSaveDict,
+                  bot.testGetNewSubmissions,bot.testReplyToComment,
+                  bot.testReplyToPos,bot.testClearData,
+                  )
         
 
 def load_tests(loader, tests):
-    suite = unittest.TestSuite()
-    for case in test_cases:
-        suite.addTest(case)
-    x           = unittest.TextTestRunner()
-    x.verbosity = 1
-    x.run(suite)
+    suite = unittest.loader.makeSuite(TestLaughRule)
+    v       = unittest.TextTestRunner()
+    v.verbosity = 1
+    v.run(suite)
+    suite   = unittest.loader.makeSuite(TestRedditBot)
+    v.run(suite)
     
     
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
-    load_tests(unittest.loader,test_cases)
+    load_tests(unittest.loader,bot_test_cases)
