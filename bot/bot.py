@@ -311,10 +311,7 @@ class GatherLinkRule(BaseRule):
             if len(self._links['comm_links'])==0:
                 response += "None \n\n\n"
             for i,link in enumerate(self._links['comm_links']):
-                print(link)
                 response = response + GatherLinkRule.__post_temp(i,link.group(0),"nyi","nyi") + "\n"
-                
-        
         # return the response for now
         return response
         

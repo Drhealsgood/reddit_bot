@@ -292,6 +292,9 @@ class TestGatherLinkRule(TestBaseRule):
         for submission in submissions:
             helper(submission)
         self.assertTrue(False)
+        """
+            @todo
+            """
         
     def testExecution(self):
         submissions  = self._reddit_bot._get_hot_submissions('drsbottesting', 1)
@@ -301,8 +304,10 @@ class TestGatherLinkRule(TestBaseRule):
         for submission in submissions:
             # gather links via condition
             result  = self._rule.condition(submission)
-            if result:
-                print(self._rule.action())
+            """
+            @todo
+            """
+        self.assertTrue(False)
             
             
             
