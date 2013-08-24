@@ -5,6 +5,9 @@ Created on 23/07/2013
 '''
 import unittest
 from bot import *
+from mock import Mock
+import re
+
 def gather_data():
     global REDDIT
     ua      = "test_bot"
@@ -46,10 +49,6 @@ class TestRedditBot(unittest.TestCase):
                 self.assertEqual(attrs['_RedditBot'+val],expected[val],
                             "got {0} for {1}, expected {2}".format(attrs['_RedditBot'+val],
                                                                     val, expected[val]))
-            else:
-                self.assertEqual(attrs['_RedditBot'+val],expected[val],
-                                 "got {0} for {1}, expected {2}".format(attrs['_RedditBot'+val],
-                                                                        val, expected[val]))
             
     def testInitWithParams(self):
         """
@@ -114,14 +113,14 @@ class TestRedditBot(unittest.TestCase):
         # get submission
         # add submission to checked
         # ensure submission is in checked
-        pass
+        self.assertTrue(False)
     
     def testGetHotSubmissions(self):
         """
             returns top n submissions from whichever subreddit passed
             @todo: if a subreddit has less than n submissions, what do?
+            should scan all subreddits bot is applied to.
         """
-        n           = 1
         topSubs     = self._bot._get_hot_submissions('drsbottesting', 3)
         self.assertEqual(len(list(topSubs)),3)
         
@@ -129,12 +128,13 @@ class TestRedditBot(unittest.TestCase):
         """
         Saves the dictionary passed to the location passed via pickle
         """
-        pass
+        self.assertTrue(False)
     
     def testGetNewSubmissions(self):
         """
         returns n new submissions from the subreddit passed
         """
+        self.assertTrue(False)
         n           = 1
         submission  = next(REDDIT.get_subreddit("drsbottesting").get_hot())
         newSubs     = self._bot._get_new_top_submissions('drsbottesting', submission, n)
@@ -145,14 +145,14 @@ class TestRedditBot(unittest.TestCase):
         Replies to a comment with msg passed
         if passed comment is not a comment will (raise typeerror)?
         """
-        pass
+        self.assertTrue(False)
     
     def testReplyToPos(self):
         """
         Replies to a post with msg passed
         if passed post is not a post will (raise typeerror)?
         """
-        pass
+        self.assertTrue(False)
     
     def testClearData(self):
         """
@@ -233,22 +233,76 @@ class TestLaughRule(TestBaseRule):
             self.assertFalse(True)
 
         def testCondition(self):
-            return TestBaseRule.testCondition(self)
+            pass
 
 
         def testAction(self):
             return TestBaseRule.testAction(self)
         
-        def fail(self):
-            self.assertTrue(False)
+class TestGatherLinkRule(TestBaseRule):
+    _reddit_bot     = RedditBot()
+    
+    def testGatherLinks(self):
+        submission = self._reddit_bot._get_hot_submissions('drsbottesting', 1)
+        sub         = next(submission)
+        # make sure it is link post
+        self.assertRegex(sub.selftext, '\[*\]\(http*.*\)', 
+                         "Expected link in submission selftext")
+        flat        = praw.helpers.flatten_tree(sub.comments)
+        # gather links
+        comm_links  = []
+        pattern     = re.compile('\[*\]\(http*.*\)')
+        sub_lins    = re.findall(pattern,sub.selftext)
+        for comment in flat:
+            comm_links.append(re.findall(pattern,comment.body))
+        all_links   = sub_lins + comm_links
+        
+        # Uncomment this and remove other code when gather_links has been moved
+#        self.assertEqual(len(all_links),len(self._reddit_bot._gather_links(submission)))
+        self.assertEqual(len(all_links),len(self._rule._gather_links(sub)))
+    
+    def setUp(self):
+        self._rule  = GatherLinkRule(self._reddit_bot,'drsbottesting')
+        
+    def tearDown(self):
+        self._rule  = None
+    
+    def testEq(self):
+        self.assertTrue(False)
+
+
+    def testCondition(self):
+        self.assertTrue(False)
+
+
+    def testAction(self):
+        """
+        GatherLinkRule acts by gathering all links in submission selftext,
+        all links in comments text, and posts a comment with all links
+        @todo: proper test - just checking action here, needs to be implemented
+        with bot for proper testing.
+        """
+        
+            
+        submissions  = self._reddit_bot._get_hot_submissions('drsbottesting', 1)
+        # add rule to bot
+        self._reddit_bot.add_rule(self._rule)
+        # check submission has a link
+        for submission in submissions:
+            helper(submission)
+        self.assertTrue(False)
+        
 
 def load_tests(loader):
     suite = unittest.loader.makeSuite(TestLaughRule)
     v       = unittest.TextTestRunner()
     v.verbosity = 1
     v.run(suite)
+    suite   = unittest.loader.makeSuite(TestGatherLinkRule)
+    v.run(suite)
     suite   = unittest.loader.makeSuite(TestRedditBot)
     v.run(suite)
+    
     
     
 if __name__ == "__main__":

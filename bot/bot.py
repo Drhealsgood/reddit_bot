@@ -14,6 +14,7 @@ import time
 import praw
 import string
 import pickle
+import re
 from pprint import pprint
 from getpass import getpass
 from abc import ABCMeta, abstractmethod, abstractproperty
@@ -34,6 +35,10 @@ class RedditBot(object):
             cehck subreddits to attempt to find a place to comment
             check if URL is a comment on reddit
             login as user x
+            
+    @todo:
+        implement properties for hot_submissions and top_submissions.
+           - Should scan all subreddits bot is applied to.
     """
     # set unique and descriptive user_agent
     __user_agent    = "reddit_bot_test v0.0 by /u/drhealsgood and /u/"
@@ -241,8 +246,71 @@ class LaughRule(BaseRule):
     
     def action(self,submission):
         print(submission.id,"Hit laugh rule action")
+        
+class GatherLinkRule(BaseRule):
+    """
+    GatherLinkRule collects all the links posted in the comment section and the post section of a submission to Reddit
+    and puts a comment on the submission of all the links gathered
+    """
+    __name      = "GatherLinkRule"
+    __post_temp = lambda template, num, title, link, author: "{num}: {title} {link} {author}".format(num,
+                                                title, link, author)
+    __regex_links = re.compile("\[*\]\(http*.*\)")
     
     
+    def __init__(self,bot,subreddits):
+        super().__init__(subreddits)
+        self._bot   = bot
+        self.__links= {}
+        
+    def _gather_links(self,submission):
+        """
+        @todo: Move to Bot
+        """
+        # gather comments and self text
+        comments    = praw.helpers.flatten_tree(submission.comments)
+        selftext    = submission.selftext
+        # collect links in unordered fashion
+        self_links  = re.findall(self.__regex_links,selftext)
+        comm_links  = []
+        for comment in comments:
+            comm_links.append(re.findall(self.__regex_links,comment.body))
+        return self_links+comm_links
+    
+    def condition(self,submission):
+        """
+        If there are any links in the post or comments the links will be linked to the rule
+        and condition will be met
+        """
+        # clear self._links of any previous links
+        self._links = []
+        self_links,comm_links = self._gather_links(submission)
+        # check if any links contained
+        if (len(self_links) > 0 or len(comm_links) > 0):
+            self._links['selftext']     = self_links
+            self._links['comm_links']   = comm_links
+            return True
+        # failure if this point is reached
+        return False
+    
+    def action(self):
+        """
+        Respond to post with all links
+        """
+        response = ""
+        if 'selftext' in self._links.keys():
+            response += "Submission Links: \n\n"
+            if len(self._links['selftext'])==0:
+                response += "None \n\n\n"
+            for i,link in enumerate(self._links['selftext']):
+                response = response + self.__post_temp(i,link[0],link[1],link[2],link[3])
+        if 'comm_links' in self._links.keys():
+            response += "Comment Links: \n\n"
+            if len(self._links['comm_links'])==0:
+                response += "None \n\n\n"
+            for i,link in enumerate(self._links['comm_links']):
+                response = response + self.__post_temp(i,link[0],link[1],link[2],link[3])
+        
         
 #if __name__ == "__main__":
 #    x       = RedditBot((),["python","funny"]) 
