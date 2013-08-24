@@ -246,20 +246,21 @@ class TestGatherLinkRule(TestBaseRule):
         submission = self._reddit_bot._get_hot_submissions('drsbottesting', 1)
         sub         = next(submission)
         # make sure it is link post
-        self.assertRegex(sub.selftext, '\[*\]\(http*.*\)', 
+        self.assertRegex(sub.selftext, '\[.*\]\(http.*\..*\)', 
                          "Expected link in submission selftext")
         flat        = praw.helpers.flatten_tree(sub.comments)
         # gather links
         comm_links  = []
-        pattern     = re.compile('\[*\]\(http*.*\)')
-        sub_lins    = re.findall(pattern,sub.selftext)
+        pattern     = re.compile('\[.*\]\(http.*\..*\)')
+        sub_lins    = re.finditer(pattern,sub.selftext)
         for comment in flat:
-            comm_links.append(re.findall(pattern,comment.body))
-        all_links   = sub_lins + comm_links
+            comm_links.append(re.finditer(pattern,comment.body))
+        all_links   = [link for link in sub_lins],[link for group in comm_links for link in group]
         
         # Uncomment this and remove other code when gather_links has been moved
 #        self.assertEqual(len(all_links),len(self._reddit_bot._gather_links(submission)))
-        self.assertEqual(len(all_links),len(self._rule._gather_links(sub)))
+        for i in range(2):
+            self.assertEqual(len(all_links[i]),len(self._rule._gather_links(sub)[i]))
     
     def setUp(self):
         self._rule  = GatherLinkRule(self._reddit_bot,'drsbottesting')
@@ -292,6 +293,19 @@ class TestGatherLinkRule(TestBaseRule):
             helper(submission)
         self.assertTrue(False)
         
+    def testExecution(self):
+        submissions  = self._reddit_bot._get_hot_submissions('drsbottesting', 1)
+        # add rule to bot
+        self._reddit_bot.add_rule(self._rule)
+        # check submission has a link
+        for submission in submissions:
+            # gather links via condition
+            result  = self._rule.condition(submission)
+            if result:
+                print(self._rule.action())
+            
+            
+            
 
 def load_tests(loader):
     suite = unittest.loader.makeSuite(TestLaughRule)

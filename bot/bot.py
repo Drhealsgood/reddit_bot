@@ -253,9 +253,9 @@ class GatherLinkRule(BaseRule):
     and puts a comment on the submission of all the links gathered
     """
     __name      = "GatherLinkRule"
-    __post_temp = lambda template, num, title, link, author: "{num}: {title} {link} {author}".format(num,
-                                                title, link, author)
-    __regex_links = re.compile("\[*\]\(http*.*\)")
+    __post_temp = lambda num, title, link, author: "{num}: {title} {link} {author}".format(num=num,
+                                                title=title, link=link, author=author)
+    __regex_links = re.compile("\[.*\]\(http.*\..*\)")
     
     
     def __init__(self,bot,subreddits):
@@ -271,11 +271,12 @@ class GatherLinkRule(BaseRule):
         comments    = praw.helpers.flatten_tree(submission.comments)
         selftext    = submission.selftext
         # collect links in unordered fashion
-        self_links  = re.findall(self.__regex_links,selftext)
+        self_links  = re.finditer(self.__regex_links,selftext)
         comm_links  = []
         for comment in comments:
-            comm_links.append(re.findall(self.__regex_links,comment.body))
-        return self_links+comm_links
+            comm_links.append(re.finditer(self.__regex_links,comment.body))
+            # so messsy
+        return [s_link for s_link in self_links],[c_link for group in comm_links for c_link in group]
     
     def condition(self,submission):
         """
@@ -283,7 +284,7 @@ class GatherLinkRule(BaseRule):
         and condition will be met
         """
         # clear self._links of any previous links
-        self._links = []
+        self._links = {}
         self_links,comm_links = self._gather_links(submission)
         # check if any links contained
         if (len(self_links) > 0 or len(comm_links) > 0):
@@ -303,13 +304,19 @@ class GatherLinkRule(BaseRule):
             if len(self._links['selftext'])==0:
                 response += "None \n\n\n"
             for i,link in enumerate(self._links['selftext']):
-                response = response + self.__post_temp(i,link[0],link[1],link[2],link[3])
+                # get title and link from link and take author from Comment?
+                response = response + GatherLinkRule.__post_temp(i,link.group(0),"nyi",'NYI') + "\n"
         if 'comm_links' in self._links.keys():
-            response += "Comment Links: \n\n"
+            response += "\n\nComment Links: \n\n"
             if len(self._links['comm_links'])==0:
                 response += "None \n\n\n"
             for i,link in enumerate(self._links['comm_links']):
-                response = response + self.__post_temp(i,link[0],link[1],link[2],link[3])
+                print(link)
+                response = response + GatherLinkRule.__post_temp(i,link.group(0),"nyi","nyi") + "\n"
+                
+        
+        # return the response for now
+        return response
         
         
 #if __name__ == "__main__":
