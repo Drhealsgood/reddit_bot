@@ -246,12 +246,12 @@ class TestGatherLinkRule(TestBaseRule):
         submission = self._reddit_bot._get_hot_submissions('drsbottesting', 1)
         sub         = next(submission)
         # make sure it is link post
-        self.assertRegex(sub.selftext, '\[.*\]\(http.*\..*\)', 
+        self.assertRegex(sub.selftext, '\[.*\]\(http(|s)://.*\..*\)', 
                          "Expected link in submission selftext")
         flat        = praw.helpers.flatten_tree(sub.comments)
         # gather links
         comm_links  = []
-        pattern     = re.compile('\[.*\]\(http.*\..*\)')
+        pattern     = re.compile('\[.*\]\(http(|s)://.*\..*\)')
         sub_lins    = re.finditer(pattern,sub.selftext)
         for comment in flat:
             comm_links.append(re.finditer(pattern,comment.body))

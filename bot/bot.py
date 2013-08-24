@@ -255,7 +255,7 @@ class GatherLinkRule(BaseRule):
     __name      = "GatherLinkRule"
     __post_temp = lambda num, title, link, author: "{num}: {title} {link} {author}".format(num=num,
                                                 title=title, link=link, author=author)
-    __regex_links = re.compile("\[.*\]\(http.*\..*\)")
+    __regex_links = re.compile("\[.*\]\(http(|s)://.*\..*\)")
     
     
     def __init__(self,bot,subreddits):
