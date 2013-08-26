@@ -41,7 +41,6 @@ class TestRedditBot(unittest.TestCase):
         expected    = {'__rules':       (),
                        '__subreddits':  (),
                        '__done':        {},
-                       '__rules_run':   [],
                        '__id'       :   ID
                        }
         for val in expected:
@@ -162,10 +161,9 @@ class TestRedditBot(unittest.TestCase):
         # all rules, subreddits, rules_run, and submissions checked
         # should be set to blank slate
         expected= {'rules':(),'subreddits':(),
-                   'rules_run':[],'done':{},}    
+                   'done':{},}    
         actual  = {'rules':self._bot.rules,
                    'subreddits':self._bot.subreddits,
-                   'rules_run':self._bot.rules_run,
                    'done':self._bot.submissions_checked,
                    }    
         for val in expected:
@@ -221,23 +219,25 @@ class TestBaseRule(unittest.TestCase,metaclass=ABCMeta):
         self.assertEqual(self._rule.action(self._submission),self._submission)
     
 class TestLaughRule(TestBaseRule):
+    _reddit_bot     = RedditBot()
     
-        def setUp(self):
-            pass
+    def setUp(self):
+        self._rule  = LaughRule(self._reddit_bot,'drsbottesting')
 
 
-        def tearDown(self):
-            pass
+    def tearDown(self):
+        self._rule  = None
 
-        def testEq(self):
-            self.assertFalse(True)
+    def testEq(self):
+        self.assertEqual(self._rule,LaughRule(self._reddit_bot,'drsbottesting'))
+        self.assertNotEqual(self._rule,LaughRule(self._reddit_bot,'datgap'))
 
-        def testCondition(self):
-            pass
+    def testCondition(self):
+        self.assertFalse(True)
 
 
-        def testAction(self):
-            return TestBaseRule.testAction(self)
+    def testAction(self):
+        return TestBaseRule.testAction(self)
         
 class TestGatherLinkRule(TestBaseRule):
     _reddit_bot     = RedditBot()
@@ -246,8 +246,7 @@ class TestGatherLinkRule(TestBaseRule):
         submission = self._reddit_bot._get_hot_submissions('drsbottesting', 1)
         sub         = next(submission)
         # make sure it is link post
-        self.assertRegex(sub.selftext, '\[.*\]\(http(|s)://.*\..*\)', 
-                         "Expected link in submission selftext")
+        self.assertIn('this_post_has_links',sub.permalink)
         flat        = praw.helpers.flatten_tree(sub.comments)
         # gather links
         comm_links  = []
@@ -258,9 +257,9 @@ class TestGatherLinkRule(TestBaseRule):
         all_links   = [link for link in sub_lins],[link for group in comm_links for link in group]
         
         # Uncomment this and remove other code when gather_links has been moved
-#        self.assertEqual(len(all_links),len(self._reddit_bot._gather_links(submission)))
-        for i in range(2):
-            self.assertEqual(len(all_links[i]),len(self._rule._gather_links(sub)[i]))
+        self.assertEqual(len(all_links),len(self._reddit_bot._gather_links(sub)))
+#        for i in range(2):
+#            self.assertEqual(len(all_links[i]),len(self._rule._gather_links(sub)[i]))
     
     def setUp(self):
         self._rule  = GatherLinkRule(self._reddit_bot,'drsbottesting')
@@ -283,34 +282,11 @@ class TestGatherLinkRule(TestBaseRule):
         @todo: proper test - just checking action here, needs to be implemented
         with bot for proper testing.
         """
+        submissions     = self._reddit_bot._get_hot_submissions('drsbottesting', 1)
+        # gather links in submission
+        sub             = next(submissions)
+        links           = self._reddit_bot._gather_links(sub)
         
-            
-        submissions  = self._reddit_bot._get_hot_submissions('drsbottesting', 1)
-        # add rule to bot
-        self._reddit_bot.add_rule(self._rule)
-        # check submission has a link
-        for submission in submissions:
-            helper(submission)
-        self.assertTrue(False)
-        """
-            @todo
-            """
-        
-    def testExecution(self):
-        submissions  = self._reddit_bot._get_hot_submissions('drsbottesting', 1)
-        # add rule to bot
-        self._reddit_bot.add_rule(self._rule)
-        # check submission has a link
-        for submission in submissions:
-            # gather links via condition
-            result  = self._rule.condition(submission)
-            """
-            @todo
-            """
-        self.assertTrue(False)
-            
-            
-            
 
 def load_tests(loader):
     suite = unittest.loader.makeSuite(TestLaughRule)

@@ -145,6 +145,18 @@ class RedditBot(object):
         """
         comment.reply(msg)
         
+    def _gather_links(self,submission):
+        regex       = re.compile("\[.*\]\(http(|s)://.*\..*\)")
+        # gather comments and self text
+        comments    = praw.helpers.flatten_tree(submission.comments)
+        selftext    = submission.selftext
+        # collect links in unordered fashion
+        self_links  = re.finditer(regex,selftext)
+        comm_links  = []
+        for comment in comments:
+            comm_links.append(re.finditer(regex,comment.body))
+        return [s_link for s_link in self_links],[c_link for group in comm_links for c_link in group]
+        
     @classmethod
     def _display_submission_info(cls,submission):
         pprint(vars(submission))
@@ -263,21 +275,6 @@ class GatherLinkRule(BaseRule):
         self._bot   = bot
         self.__links= {}
         
-    def _gather_links(self,submission):
-        """
-        @todo: Move to Bot
-        """
-        # gather comments and self text
-        comments    = praw.helpers.flatten_tree(submission.comments)
-        selftext    = submission.selftext
-        # collect links in unordered fashion
-        self_links  = re.finditer(self.__regex_links,selftext)
-        comm_links  = []
-        for comment in comments:
-            comm_links.append(re.finditer(self.__regex_links,comment.body))
-            # so messsy
-        return [s_link for s_link in self_links],[c_link for group in comm_links for c_link in group]
-    
     def condition(self,submission):
         """
         If there are any links in the post or comments the links will be linked to the rule
@@ -285,7 +282,7 @@ class GatherLinkRule(BaseRule):
         """
         # clear self._links of any previous links
         self._links = {}
-        self_links,comm_links = self._gather_links(submission)
+        self_links,comm_links = self.__bot._gather_links(submission)
         # check if any links contained
         if (len(self_links) > 0 or len(comm_links) > 0):
             self._links['selftext']     = self_links
