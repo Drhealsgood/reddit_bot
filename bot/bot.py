@@ -140,11 +140,14 @@ class RedditBot(object):
         return self.__reddit.get_subreddit(subreddit).get_hot(limit=None,
                                                               place_holder=submission.id)
     
-    def _reply_to_comment(self,comment,msg):
+    def _reply(self,data,msg):
         """
-        replies to comment with msg
+        replies to data based upon whether it is a submission or a comment
         """
-        comment.reply(msg)
+        if isinstance(data,praw.objects.Submission):
+            data.add_comment(msg)
+        elif isinstance(data,praw.objects.Comment):
+            data.reply(msg)
         
     def _gather_links(self,submission):
         regex       = re.compile("\[.*\]\(http(|s)://.*\..*\)")
@@ -259,10 +262,7 @@ class LaughRule(BaseRule):
         choices     = ["Not even funny bro","Hah, you wish you were this funny",
                    "STAHP LAUGHING","I show you humour."]
         choice      = random.choice(choices)
-        if isinstance(data,praw.objects.Submission):
-            data.add_comment(choice)
-        elif isinstance(data,praw.objects.Comment):
-            data.reply(choice)
+        self._bot._reply(data,choice)
         
 class GatherLinkRule(BaseRule):
     """
