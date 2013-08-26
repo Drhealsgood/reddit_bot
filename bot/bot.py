@@ -13,6 +13,7 @@ and that should give all the unchecked as well
 import time
 import praw
 import string
+import random
 import pickle
 import re
 from pprint import pprint
@@ -253,8 +254,15 @@ class LaughRule(BaseRule):
             return meets
         return False
     
-    def action(self,submission):
-        print(submission.id,"Hit laugh rule action")
+    def action(self,data):
+        # respond to data with one of choices
+        choices     = ["Not even funny bro","Hah, you wish you were this funny",
+                   "STAHP LAUGHING","I show you humour."]
+        choice      = random.choice(choices)
+        if isinstance(data,praw.objects.Submission):
+            data.add_comment(choice)
+        elif isinstance(data,praw.objects.Comment):
+            data.reply(choice)
         
 class GatherLinkRule(BaseRule):
     """
