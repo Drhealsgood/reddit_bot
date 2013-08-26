@@ -237,16 +237,19 @@ class TestLaughRule(TestBaseRule):
 
 
     def testAction(self):
-        return TestBaseRule.testAction(self)
+        self.assertFalse(True)
         
 class TestGatherLinkRule(TestBaseRule):
     _reddit_bot     = RedditBot()
     
     def testGatherLinks(self):
-        submission = self._reddit_bot._get_hot_submissions('drsbottesting', 1)
-        sub         = next(submission)
+        submission  = self._reddit_bot._get_hot_submissions('drsbottesting', 5)
+        not_found   = True 
         # make sure it is link post
-        self.assertIn('this_post_has_links',sub.permalink)
+        while not_found:
+            sub = next(submission)
+            if 'this_post_has_links' in sub.permalink:
+                break;
         flat        = praw.helpers.flatten_tree(sub.comments)
         # gather links
         comm_links  = []
@@ -258,8 +261,8 @@ class TestGatherLinkRule(TestBaseRule):
         
         # Uncomment this and remove other code when gather_links has been moved
         self.assertEqual(len(all_links),len(self._reddit_bot._gather_links(sub)))
-#        for i in range(2):
-#            self.assertEqual(len(all_links[i]),len(self._rule._gather_links(sub)[i]))
+        for i in range(2):
+            self.assertEqual(len(all_links[i]),len(self._reddit_bot._gather_links(sub)[i]))
     
     def setUp(self):
         self._rule  = GatherLinkRule(self._reddit_bot,'drsbottesting')
@@ -268,10 +271,14 @@ class TestGatherLinkRule(TestBaseRule):
         self._rule  = None
     
     def testEq(self):
-        self.assertTrue(False)
+        self.assertEqual(self._rule,GatherLinkRule(self._reddit_bot,'drsbottesting'))
+        self.assertNotEqual(self._rule,GatherLinkRule(self._reddit_bot,'datgap'))
 
 
     def testCondition(self):
+        # if a submission or a comment contains a link, RETURN = TRUE
+        # ELSE FALSE
+        # Condition should also add links to the rule
         self.assertTrue(False)
 
 

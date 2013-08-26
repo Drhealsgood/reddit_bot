@@ -221,7 +221,6 @@ class BaseRule(Rule):
         return self.__active_subreddits
     
     def __eq__(self,other):
-        print(self.name,other.name)
         return (self.name==other.name) and (
                     self.subreddits_allowed==other.subreddits_allowed)
         
@@ -239,8 +238,6 @@ class LaughRule(BaseRule):
     
     def __init__(self,bot,subreddits=["funny"]):
         super().__init__(subreddits)
-        # I think it is terrible design.... probably
-        # need to rethink it
         self._bot   = bot
     
     def condition(self,submission):
